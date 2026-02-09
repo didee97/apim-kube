@@ -1,0 +1,102 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: wso2-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https-apim
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: wso2-ingress-cert
+      hosts:
+        - "apim.local"
+    - port:
+        number: 443
+        name: https-gw
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: wso2-ingress-cert
+      hosts:
+        - "gw.local"
+    - port:
+       number: 443
+       name: https-is
+       protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: wso2-ingress-cert
+      hosts:
+        - "wso2is.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: apim-vs
+  namespace: wso2
+spec:
+  hosts:
+    - "apim.local"
+  gateways:
+    - istio-system/wso2-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: apim-wso2am-all-in-one-am-service
+            port:
+              number: 9443
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: gw-vs
+  namespace: wso2
+spec:
+  hosts:
+    - "gw.local"
+  gateways:
+    - istio-system/wso2-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: apim-gw-wso2am-universal-gw-service
+            port:
+              number: 8243
+---
+# DestinationRule for APIM - Enable TLS to backend with self-signed cert support
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: apim-dr
+  namespace: wso2
+spec:
+  host: apim-wso2am-all-in-one-am-service
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true # Required for self-signed certificates
+---
+# DestinationRule for Gateway - Enable TLS to backend with self-signed cert support
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: gw-dr
+  namespace: wso2
+spec:
+  host: apim-gw-wso2am-universal-gw-service
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true # Required for self-signed certificates
