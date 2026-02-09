@@ -1,10 +1,10 @@
 #!/bin/bash
-# Generate self-signed certificates for *.local domains
-# Creates: CA cert, server cert, JKS keystores, and updates truststore
-
 set -e
 
-DOMAIN="*.local"
+# Use arguments from Ansible, or fallback to defaults
+APIM_DOMAIN="${1:-apim.local}"
+GW_DOMAIN="${2:-gw.local}"
+
 PASSWORD="wso2carbon"
 OUTPUT_DIR="./certificates"
 
@@ -21,19 +21,15 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt \
 echo "Generating server private key..."
 openssl genrsa -out server.key 2048
 
-echo "Generating server certificate signing request..."
+echo "Generating server certificate signing request for $APIM_DOMAIN and $GW_DOMAIN..."
 openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.local" \
-  -addext "subjectAltName = DNS:*.local,DNS:localhost,DNS:apim.local,DNS:gw.local,DNS:websocket.local,DNS:websub.local"
+  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.$APIM_DOMAIN" \
+  -addext "subjectAltName = DNS:localhost,DNS:$APIM_DOMAIN,DNS:$GW_DOMAIN,DNS:websocket.local,DNS:websub.local"
 
 echo "Signing server certificate with CA..."
 openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
   -out server.crt -days 3650 -sha256 \
-  -extfile <(printf "subjectAltName = DNS:*.local,DNS:localhost,DNS:apim.local,DNS:gw.local,DNS:websocket.local,DNS:websub.local")
-
-echo "Creating PKCS12 keystore..."
-openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12 \
-  -name wso2carbon -password pass:"$PASSWORD"
+  -extfile <(printf "subjectAltName = DNS:localhost,DNS:$APIM_DOMAIN,DNS:$GW_DOMAIN,DNS:websocket.local,DNS:websub.local")
 
 echo "Files created:"
 echo "  ca.crt - CA certificate"
