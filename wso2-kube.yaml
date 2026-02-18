@@ -62,7 +62,13 @@
         - istio_check.resources | length == 0
 
     - name: Enable Sidecar Injection for wso2
-      command: "kubectl label namespace {{ target_namespace }} istio-injection=enabled --overwrite"
+      kubernetes.core.k8s:
+        kind: Namespace
+        name: wso2
+        definition:
+          metadata:
+            labels:
+              istio-injection: enabled
       when: istio_check.resources | length != 0
 
     - name: 5. Handle Certificates & Domain Logic
