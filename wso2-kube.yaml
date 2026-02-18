@@ -111,11 +111,13 @@
       when: istio_check.resources | length != 0
 
     - name: 6. Deploy MySQL Database
-      block:
-        - name: Run MySQL Setup Script
-          shell: "./scripts/deploy-mysql.sh"
-          args:
-            chdir: "{{ base_path }}"
+      kubernetes.core.k8s:
+        state: present
+        namespace: "{{ target_namespace }}"
+        src: "{{ base_path }}/{{ item }}"
+      loop:
+        - mysql-init-scripts.yaml
+        - mysql.yaml
         
     - name: 7. Deploy WSO2 CP
       kubernetes.core.k8s:
