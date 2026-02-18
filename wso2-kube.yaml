@@ -45,10 +45,6 @@
       register: istio_check
       ignore_errors: yes
 
-    - name: Debug Istio Check
-      debug:
-        var: istio_check
-
     - name: 4. Install Istio & Label Namespace
       block:
         - name: Download and Install Istio
