@@ -92,8 +92,8 @@
             replace: "{{ item.1.replacement }}"
           with_nested:
             - [ 'istio-gateway.yaml', 'cm-cp1.yaml', 'cm-cp2.yaml', 'cm-gw.yaml' ]
-            - - { pattern: 'apim\.local', replacement: "apim\.{{ domain_name }}" }
-              - { pattern: 'gw\.local',   replacement: "gw\.{{ domain_name }}" }
+            - - { pattern: 'apim\.local', replacement: "apim.{{ domain_name }}" }
+              - { pattern: 'gw\.local',   replacement: "gw.{{ domain_name }}" }
 
         - name: Apply Istio Gateway and VirtualService
           kubernetes.core.k8s:
