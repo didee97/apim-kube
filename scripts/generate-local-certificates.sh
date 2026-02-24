@@ -23,7 +23,7 @@ openssl genrsa -out server.key 2048
 
 echo "Generating server certificate signing request for $APIM_DOMAIN and $GW_DOMAIN..."
 openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.$APIM_DOMAIN" \
+  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.local" \
   -addext "subjectAltName = DNS:localhost,DNS:$APIM_DOMAIN,DNS:$GW_DOMAIN,DNS:websocket.local,DNS:websub.local"
 
 echo "Signing server certificate with CA..."
