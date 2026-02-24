@@ -2,8 +2,9 @@
 set -e
 
 # Use arguments from Ansible, or fallback to defaults
-APIM_DOMAIN="${1:-apim.local}"
-GW_DOMAIN="${2:-gw.local}"
+BASE_DOMAIN="${1:-local}"
+APIM_DOMAIN="apim.${BASE_DOMAIN}"
+GW_DOMAIN="gw.${BASE_DOMAIN}"
 
 PASSWORD="wso2carbon"
 OUTPUT_DIR="./certificates"
@@ -23,7 +24,7 @@ openssl genrsa -out server.key 2048
 
 echo "Generating server certificate signing request for $APIM_DOMAIN and $GW_DOMAIN..."
 openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.local" \
+  -subj "/C=US/ST=CA/L=Mountain View/O=WSO2/OU=WSO2/CN=*.$BASE_DOMAIN" \
   -addext "subjectAltName = DNS:localhost,DNS:$APIM_DOMAIN,DNS:$GW_DOMAIN,DNS:websocket.local,DNS:websub.local"
 
 echo "Signing server certificate with CA..."

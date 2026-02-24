@@ -13,13 +13,9 @@
     - name: install_istio
       prompt: "Do you want to install Istio? (yes/no)"
       private: no
-    - name: apim_domain
-      prompt: "Enter APIM domain"
-      default: "apim.local"
-      private: no
-    - name: gw_domain
-      prompt: "Enter Gateway domain"
-      default: "gw.local"
+    - name: domain_name
+      prompt: "Enter domain name"
+      default: "local"
       private: no
 
   tasks:
@@ -70,7 +66,7 @@
     - name: 5. Handle Certificates & Domain Logic
       block:
         - name: Run certificate generation script
-          shell: "./scripts/generate-local-certificates.sh {{ apim_domain }} {{ gw_domain }}"
+          shell: "./scripts/generate-local-certificates.sh {{ domain_name }}"
           args:
             chdir: "{{ base_path }}"
 
